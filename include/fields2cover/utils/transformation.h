@@ -26,6 +26,10 @@ class Transform {
 
   static F2CPath transformPathWithFieldRef(const F2CPath& path,
       const F2CField& field, const std::string& coord_sys_to);
+  static F2CSwath transformSwathWithFieldRef(const F2CSwath& swath,
+      const F2CField& field, const std::string& coord_sys_to);
+  static F2CSwaths transformSwathsWithFieldRef(const F2CSwaths& swaths,
+      const F2CField& field, const std::string& coord_sys_to);
 
 
   static void transform(F2CField& field, const std::string& coord_sys_to);
@@ -61,7 +65,7 @@ class Transform {
   static F2CPoint getRefPointInGPS(const F2CField& field);
 
   static std::unique_ptr<OGRSpatialReference, void(*)(OGRSpatialReference*)>
-        createSptRef(const std::string& coord_sys);
+        createSptRef(const std::string& coord_sys, bool fail_silently = false);
 
   static std::unique_ptr<OGRCoordinateTransformation,
     void(*)(OGRCoordinateTransformation*)> createCoordTransf(
