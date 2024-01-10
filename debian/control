@@ -1,0 +1,13 @@
+Source: ros-rolling-fields2cover
+Section: misc
+Priority: optional
+Maintainer: Gonzalo Mier <gonzalo.miermunoz@wur.nl>
+Build-Depends: debhelper (>= 9.0.0), cmake, git, lcov <!nocheck>, libeigen3-dev, libgdal-dev, libgtest-dev, libgtest-dev <!nocheck>, libtbb-dev, python3-dev, ros-rolling-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-rolling-fields2cover
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, git, libeigen3-dev, libgdal-dev, libgtest-dev, libtbb-dev, python3-dev, python3-matplotlib, python3-tk, ros-rolling-ros-workspace
+Description: Robust and efficient coverage paths for autonomous agricultural vehicles.
+ A modular and extensible Coverage Path Planning library
