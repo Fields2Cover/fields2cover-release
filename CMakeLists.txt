@@ -1,7 +1,8 @@
 
-set(FIELDS2COVER_MAJOR_VERSION "1")
-set(FIELDS2COVER_MINOR_VERSION "2")
-set(FIELDS2COVER_PATCH_VERSION "1")
+set(FIELDS2COVER_MAJOR_VERSION "2")
+set(FIELDS2COVER_MINOR_VERSION "0")
+set(FIELDS2COVER_PATCH_VERSION "0")
+
 set(FIELDS2COVER_VERSION_STRING
   "${FIELDS2COVER_MAJOR_VERSION}.${FIELDS2COVER_MINOR_VERSION}.${FIELDS2COVER_PATCH_VERSION}"
 )
@@ -18,7 +19,7 @@ set(PACKAGE_MAINTAINER "Gonzalo Mier")
 set(PACKAGE_URL "http://fields2cover.github.io")
 
 
-option(ALLOW_PARALLELIZATION "Allow parallel algorithms" OFF)
+option(ALLOW_PARALLELIZATION "Allow parallel algorithms" ON)
 option(BUILD_TUTORIALS "Build tutorials" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_PYTHON "Build Python SWIG module" OFF)
@@ -62,7 +63,7 @@ if (WIN32)
   set(CMAKE_SHARED_LIBRARY_PREFIX "")
 endif(WIN32)
 
-set(INSTALL_CMAKE_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/Fields2Cover)
+set(INSTALL_CMAKE_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/share/fields2cover)
 
 include(GNUInstallDirs)
 
@@ -80,35 +81,45 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
 endif(${CMAKE_VERSION} VERSION_LESS 3.14)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-FetchContent_Declare(json FETCHCONTENT_UPDATES_DISCONNECTED
-  URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
-)
-FetchContent_Declare(tinyxml2 FETCHCONTENT_UPDATES_DISCONNECTED
-  GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
-  GIT_TAG c2d30872e20621955ca7feb9168bad996d591a19
-)
 FetchContent_Declare(steering_functions FETCHCONTENT_UPDATES_DISCONNECTED
   GIT_REPOSITORY https://github.com/Fields2Cover/steering_functions.git
-  GIT_TAG 33fc010017efa1ef2c8a2d4779fcda94b4b30d20
+  GIT_TAG 13e3f5658144b3832fb1eb31a0e2f5a3cbf57db9
 )
 FetchContent_Declare(spline FETCHCONTENT_UPDATES_DISCONNECTED
   GIT_REPOSITORY https://github.com/Fields2Cover/spline.git
   GIT_TAG 1b5d4bad29082997076b264de84ca6d46c2ae6ab
 )
-FetchContent_Declare(matplotlib_cpp FETCHCONTENT_UPDATES_DISCONNECTED
-  GIT_REPOSITORY https://github.com/Fields2Cover/matplotlib-cpp.git
-  GIT_TAG 75c15d0c907a4b68bca5ef97032302bd14ccab8e
+FetchContent_Declare(matplot FETCHCONTENT_UPDATES_DISCONNECTED
+  GIT_REPOSITORY https://github.com/alandefreitas/matplotplusplus
 )
 
 FetchContent_MakeAvailable(
-  json
-  tinyxml2
   steering_functions
   spline
-  matplotlib_cpp
+  matplot
 )
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+include(cmake/Modules/FindTinyXML2.cmake)
+find_package(nlohmann_json REQUIRED)
+find_package(Threads REQUIRED)
 find_package(GDAL 3.0 REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_library(MATH_LIBRARY m)
+
+find_package(ortools CONFIG)
+if(NOT ortools_FOUND)
+  message("Or-tools not found -- Downloading and building from source")
+
+  FetchContent_Declare(ortools FETCHCONTENT_UPDATES_DISCONNECTED
+    URL https://github.com/google/or-tools/releases/download/v9.9/or-tools_amd64_ubuntu-22.04_cpp_v9.9.3963.tar.gz
+  )
+  FetchContent_Populate(ortools)
+  include_directories(${ortools_SOURCE_DIR}/include)
+  include_directories(${ortools_SOURCE_DIR}/lib)
+endif()
+
+
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
@@ -153,9 +164,9 @@ target_compile_features(Fields2Cover PUBLIC cxx_std_17)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   target_compile_options(Fields2Cover PRIVATE
-    -pedantic -Wall -Wfatal-errors
+    -Wall -Wfatal-errors
     -Wno-dev -Wextra -Wno-unused-parameter -Wno-sign-compare
-    -Wno-attributes -Wl,--no-undefined -Wshadow
+    -Wno-attributes -Wl,--no-undefined
   )
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   target_compile_options(Fields2Cover PRIVATE /W4)
@@ -168,6 +179,9 @@ endif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   include(cmake/Modules/CodeCoverage.cmake)
   APPEND_COVERAGE_COMPILER_FLAGS()
+  if(NOT ortools_POPULATED)
+    target_compile_options(Fields2Cover PRIVATE -pedantic -Werror)
+  endif()
   target_compile_options(Fields2Cover PRIVATE
     -g --coverage -fprofile-arcs -ftest-coverage -fno-inline
   )
@@ -188,26 +202,36 @@ else (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 
-
 target_include_directories(Fields2Cover PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-
 target_link_libraries(Fields2Cover
   PUBLIC
     ${GDAL_LIBRARIES}
-    -lpthread
+    ${CMAKE_THREAD_LIBS_INIT}
     -lgeos_c
+    ${MATH_LIBRARY}
   PRIVATE
     nlohmann_json::nlohmann_json
     tinyxml2::tinyxml2
     steering_functions
     spline
-    matplotlib_cpp
+    matplot
 )
+
+if(ortools_POPULATED)
+  target_link_libraries(Fields2Cover PRIVATE
+    ${ortools_SOURCE_DIR}/lib/libortools.so
+    ${ortools_SOURCE_DIR}/lib/libprotobuf.a
+  )
+else(ortools_POPULATED)
+  target_link_libraries(Fields2Cover PRIVATE
+    ortools::ortools
+  )
+endif(ortools_POPULATED)
 
 if(ALLOW_PARALLELIZATION)
   target_link_libraries(Fields2Cover PRIVATE tbb)
@@ -221,9 +245,8 @@ set_target_properties(Fields2Cover
 install(
   TARGETS
     Fields2Cover
-    tinyxml2
     steering_functions
-    nlohmann_json
+    matplot
   EXPORT Fields2Cover-targets
   LIBRARY DESTINATION ${INSTALL_LIB_DIR}
   ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
@@ -246,7 +269,7 @@ endif(BUILD_SHARED_LIBS)
 install(
   EXPORT Fields2Cover-targets
   FILE Fields2Cover-${type}-Targets.cmake
-  DESTINATION ${INSTALL_CMAKE_DIR}/cmake/fields2cover
+  DESTINATION ${INSTALL_CMAKE_DIR}/share/fields2cover
 )
 
 set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
@@ -261,20 +284,19 @@ install(
     "${CMAKE_CURRENT_BINARY_DIR}/Fields2CoverConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/Fields2CoverConfigVersion.cmake"
   DESTINATION
-    ${INSTALL_CMAKE_DIR}/cmake/fields2cover
+    ${INSTALL_CMAKE_DIR}/share/fields2cover
 )
 
 install(
   FILES ${CMAKE_CURRENT_SOURCE_DIR}/package.xml
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/fields2cover
 )
 
 export(
   TARGETS
     Fields2Cover
-    tinyxml2
     steering_functions
-    nlohmann_json
+    matplot
   FILE
     Fields2Cover-${type}-Targets.cmake
 )
@@ -282,7 +304,7 @@ export(
 # Copy public headers during `make install`
 install(
   DIRECTORY include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fields2cover
 )
 
 set(CMAKE_EXPORT_PACKAGE_REGISTRY ON)
