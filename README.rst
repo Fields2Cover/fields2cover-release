@@ -27,7 +27,7 @@ On the other hand, CPP in agriculture knows the area to cover, but the coverage 
 
 
 
-Fields2Cover library provides several algorithms to plan the coverage path on convex fields:
+Fields2Cover library provides several algorithms to plan the coverage path on any kind of fields:
 
 .. image:: docs/figures/diagram-F2C.jpg
    :align: center
@@ -36,8 +36,34 @@ Fields2Cover library provides several algorithms to plan the coverage path on co
 
 Although the development of this project is focused on offline planning of agricultural vehicles, the library accepts pull requests from other types of coverage planners.
 
+
+F2C version 2.0
+---------------
+
+The version 2.0 of Fields2Cover comes with support for non-convex fields and fields with obstacles!! This has been huge request from the community and finally it's here.
+
+A quick list of new additions to the library:
+
+1. Decomposition algorithms:
+  - Trapezoidal and Boustrophedon decomposition. Those algorithms are useful to split any concave field into several convex sub-fields.
+
+2. Route planner:
+  - Route optimizer using`OR-tools <https://developers.google.com/optimization>`__ can be used to order the swaths, instead of just using a known pattern.
+  - Support for a point used as the start and end points of the route.
+
+3. Path planner:
+  - Support for routes provided by the route optimizer.
+
+4. Swath generator:
+  - Speed improvement on swath generation.
+  - New cost function: `NSwathModified`. It uses an approximation to compute the number of swaths, reducing computation costs.
+
+5. Many bugs fixed!
+
+
+
 Citing
--------
+------
 
 Please cite the  following paper (https://ieeexplore.ieee.org/document/10050562) when using Fields2Cover for your research:
 
@@ -57,7 +83,7 @@ Please cite the  following paper (https://ieeexplore.ieee.org/document/10050562)
 
 
 Why?
------
+----
 
 There are many CPP papers out there, but almost no code about their implementation.
 Due to this, research about this topic is slow as you need to implement every algorithm you want to compare with.
@@ -73,7 +99,7 @@ If you are able to run it in other operative systems, open an issue/PR and it wi
 
 
 Requirements on Linux
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 Some packages are needed before compiling the package:
 
@@ -88,12 +114,15 @@ Some packages are needed before compiling the package:
    sudo apt-get update
    sudo apt-get install --no-install-recommends build-essential ca-certificates cmake \
         doxygen g++ git libeigen3-dev libgdal-dev libpython3-dev python3 python3-pip \
-        python3-matplotlib python3-tk lcov libgtest-dev libtbb-dev swig libgeos-dev
+        python3-matplotlib python3-tk lcov libgtest-dev libtbb-dev swig libgeos-dev \
+        gnuplot libtinyxml2-dev nlohmann-json3-dev
    python3 -m pip install gcovr
+
+Also, `OR-tools <https://developers.google.com/optimization>`__ for C++ is needed. Follow its installation process.
 
 
 Compilation
-^^^^^^^^^^^^
+^^^^^^^^^^^
 
 First, clone this repository.
 Then, from the main folder of the project:
@@ -113,7 +142,7 @@ Finally, you can install it as:
 
 
 Add it to your projects
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 To add Fields2Cover into your CMakeLists.txt, it is as easy as:
 
@@ -157,29 +186,6 @@ Or run on the main folder:
   pytest-3 tests/python/
 
 
-ROS Compatibility
------------------
-
-We also provide a `ROS interface <https://github.com/Fields2Cover/fields2cover_ros>`__ with ROS 1 and ROS 2. On it, you can have a nice visualization of your field and the paths generated:
-
-.. image:: docs/figures/demo_image.png
-   :align: center
-   :width: 1000px
-
-For being able to use the package from ROS, from `catkin_ws/`:
-
-.. code-block:: console
-
-  git clone https://github.com/Fields2Cover/Fields2Cover src/fields2cover
-  git clone https://github.com/Fields2Cover/fields2cover_ros src/fields2cover_ros
-  rosdep install -r --ignore-src --from-paths .
-  # Compile it with ROS 1
-  catkin_make_isolated
-  # Compile it with ROS 2
-  colcon build
-
-
-
 Stability
 ---------
 
@@ -197,29 +203,26 @@ Contributions can be easily made using |Open in GitHub Codespaces|
 
 
 License
---------
+-------
 
 Fields2Cover project is under `BSD-3 license <https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29>`__.
 
 
-
 TODO
--------
+----
 
+- Support small obstacles
+- Headland coverage
 - Create SWIG interface with Lua/R
-- Support Route planners with metaheuristics
-- Support non-convex fields
-- Consider the start and end point of the vehicle
 - ...
 
 
 
 Credits and more info
-----------
+---------------------
 
 This library is only possible thanks to `GDAL <https://gdal.org/index.html>`_ who provides the basic types of this library.
-Other great libraries that made Fields2Cover possible are `hbanzhaf/steering_functions <https://github.com/hbanzhaf/steering_functions>`_, `nlohmann/json <https://github.com/nlohmann/json/>`_, `leethomason/tinyxml2 <https://github.com/leethomason/tinyxml2>`_, `ttk592/spline <https://github.com/ttk592/spline>`_ and `lava/matplotlib-cpp <https://github.com/lava/matplotlib-cpp>`_
-
+Other great libraries that made Fields2Cover possible are `OR-tools <https://developers.google.com/optimization>`__, `hbanzhaf/steering_functions <https://github.com/hbanzhaf/steering_functions>`_, `nlohmann/json <https://github.com/nlohmann/json/>`_, `leethomason/tinyxml2 <https://github.com/leethomason/tinyxml2>`_, `ttk592/spline <https://github.com/ttk592/spline>`_ and `lava/matplotlib-cpp <https://github.com/lava/matplotlib-cpp>`_
 
 
 This code repository is part of the project Fields2Cover which is (partly) financed by the Dutch Research Council (NWO).
