@@ -77,3 +77,4 @@ if(NOT TinyXML2_LIBRARIES)
   set(TinyXML2_LIBRARIES ${TINYXML2_LIBRARY})
 endif()
 
+
