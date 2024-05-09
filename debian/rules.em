@@ -37,6 +37,7 @@ override_dh_auto_configure:
 	dh_auto_configure -- \
 		-DCMAKE_INSTALL_PREFIX="@(InstallationPrefix)" \
 		-DCMAKE_PREFIX_PATH="@(InstallationPrefix)" \
+		-DFETCHCONTENT_FULLY_DISCONNECTED=OFF \
 		$(BUILD_TESTING_ARG)
 
 override_dh_auto_build:
