@@ -1,0 +1,13 @@
+Source: ros-noetic-fields2cover
+Section: misc
+Priority: optional
+Maintainer: Gonzalo Mier <gonzalo.miermunoz@wur.nl>
+Build-Depends: debhelper (>= 9.0.0), cmake, git, lcov <!nocheck>, libboost-all-dev, libeigen3-dev, libgdal-dev, libgeos++-dev, libgtest-dev, libgtest-dev <!nocheck>, libprotobuf-dev, libprotoc-dev, libtbb-dev, libtinyxml2-dev, protobuf-compiler, python3-dev, swig
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-noetic-fields2cover
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, git, libboost-all-dev, libeigen3-dev, libgdal-dev, libgeos++-dev, libgtest-dev, libprotobuf-dev, libprotoc-dev, libtbb-dev, libtinyxml2-dev, protobuf-compiler, python3-dev, python3-matplotlib, python3-tk, swig
+Description: Robust and efficient coverage paths for autonomous agricultural vehicles.
+ A modular and extensible Coverage Path Planning library
