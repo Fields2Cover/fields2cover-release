@@ -1,3 +1,26 @@
+## fields2cover (noetic) - 2.0.0-5
+
+The packages in the `fields2cover` repository were released into the `noetic` distro by running `/usr/bin/bloom-release fields2cover --track noetic --rosdistro noetic` on `Wed, 21 May 2025 14:38:44 -0000`
+
+The `fields2cover` package was released.
+
+Version of package(s) in repository `fields2cover`:
+
+- upstream repository: https://github.com/Fields2Cover/fields2cover.git
+- release repository: https://github.com/Fields2Cover/fields2cover-release.git
+- rosdistro version: `2.0.0-4`
+- old version: `2.0.0-4`
+- new version: `2.0.0-5`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.25.1`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## fields2cover (noetic) - 2.0.0-4
 
 The packages in the `fields2cover` repository were released into the `noetic` distro by running `/usr/bin/bloom-release fields2cover --track noetic --rosdistro noetic` on `Tue, 04 Jun 2024 14:17:40 -0000`
